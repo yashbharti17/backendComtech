@@ -31,6 +31,7 @@ const cyberNewsSchema = new mongoose.Schema({
 const CyberNews = mongoose.model('CyberNews', cyberNewsSchema, 'CyberNews');
 
 // 🔄 Function to fetch and store news
+a// 🔄 Function to fetch and store unique news
 async function fetchAndStoreNews() {
   try {
     const now = new Date();
@@ -40,17 +41,29 @@ async function fetchAndStoreNews() {
       params: { keywords: 'cybersecurity', country: 'US' },
     });
 
-    const formattedNews = response.data.news.map(article => ({
-      title: article.title,
-      description: article.description,
-      url: article.url,
-      imageUrl: article.image, // <-- Extract image URL
-      published: article.published,
-      fetchedAt: now,
-    }));
+    const articles = response.data.news;
 
-    await CyberNews.insertMany(formattedNews);
-    console.log(`Inserted ${formattedNews.length} new articles at ${now.toISOString()}`);
+    let insertedCount = 0;
+
+    for (const article of articles) {
+      const result = await CyberNews.updateOne(
+        { url: article.url }, // Filter by unique article URL
+        {
+          $setOnInsert: {
+            title: article.title,
+            description: article.description,
+            imageUrl: article.image,
+            published: article.published,
+            fetchedAt: now,
+          },
+        },
+        { upsert: true }
+      );
+
+      if (result.upsertedCount > 0) insertedCount++;
+    }
+
+    console.log(`Inserted ${insertedCount} new unique articles at ${now.toISOString()}`);
   } catch (err) {
     console.error('Error fetching or storing news:', err.message);
   }
