@@ -31,7 +31,7 @@ const cyberNewsSchema = new mongoose.Schema({
 const CyberNews = mongoose.model('CyberNews', cyberNewsSchema, 'CyberNews');
 
 // 🔄 Function to fetch and store news
-a// 🔄 Function to fetch and store unique news
+ // 🔄 Function to fetch and store unique news
 async function fetchAndStoreNews() {
   try {
     const now = new Date();
