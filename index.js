@@ -105,28 +105,36 @@ const auth = new google.auth.GoogleAuth({
 });
 
 const sheets = google.sheets({ version: 'v4', auth });
-
 app.post('/api/upload-to-google', async (req, res) => {
   const spreadsheetId = '1BM7tWdvlXbzoq9TLtpfT456MxzneJetG2ds26D5q5LU';
   const sheetName = 'sheet1';
-  
+
   try {
-    // Ensure req.body is a flat object or an array of values
-    const values = [Array.isArray(req.body) ? req.body : Object.values(req.body)];
+    // ✅ Flatten object: convert array values to comma-separated strings
+    const cleanedData = {};
+    for (const [key, value] of Object.entries(req.body)) {
+      if (Array.isArray(value)) {
+        cleanedData[key] = value.join(', ');
+      } else {
+        cleanedData[key] = value;
+      }
+    }
+
+    // ✅ Prepare values as 1D array for Google Sheets row
+    const values = [Object.values(cleanedData)];
 
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: sheetName, // Removed !A1 to allow automatic row appending
+      range: sheetName,
       valueInputOption: 'USER_ENTERED',
       insertDataOption: 'INSERT_ROWS',
       resource: { values },
     });
 
     console.log('Uploaded:', response.data);
-    res.status(200).send('Data uploaded');
+    res.status(200).json({ status: 'success' });
   } catch (error) {
     console.error('Upload failed:', error.message);
-    res.status(500).send('Error uploading to Sheets');
+    res.status(500).json({ error: 'Error uploading to Sheets' });
   }
 });
-
