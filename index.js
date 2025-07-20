@@ -9,6 +9,7 @@ const PORT = 5000;
 const REFRESH_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 app.use(cors());
+app.use(express.json());
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -93,3 +94,39 @@ app.get('/api/news', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
+const { google } = require('googleapis');
+const keys = require('./credentials.json'); // path to your downloaded file
+
+const auth = new google.auth.GoogleAuth({
+  credentials: keys,
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+
+const sheets = google.sheets({ version: 'v4', auth });
+
+app.post('/api/upload-to-google', async (req, res) => {
+  const spreadsheetId = '1BM7tWdvlXbzoq9TLtpfT456MxzneJetG2ds26D5q5LU';
+  const sheetName = 'sheet1';
+  
+  try {
+    // Ensure req.body is a flat object or an array of values
+    const values = [Array.isArray(req.body) ? req.body : Object.values(req.body)];
+
+    const response = await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: sheetName, // Removed !A1 to allow automatic row appending
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      resource: { values },
+    });
+
+    console.log('Uploaded:', response.data);
+    res.status(200).send('Data uploaded');
+  } catch (error) {
+    console.error('Upload failed:', error.message);
+    res.status(500).send('Error uploading to Sheets');
+  }
+});
+
