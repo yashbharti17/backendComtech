@@ -138,11 +138,11 @@ app.post('/api/upload-to-google', async (req, res) => {
     res.status(500).json({ error: 'Error uploading to Sheets' });
   }
 });
-
 app.post('/api/run-render', async (req, res) => {
-  try{
-    res.status(200).json({status:'hello'});
-  }
-  catch(error){
+  try {
+    res.status(200).json({ status: 'hello' });
+  } catch (error) {
     res.status(500).json({ error: 'Error' });
   }
+}); // <-- this closing parenthesis and brace were missing
+
