@@ -97,7 +97,7 @@ app.listen(PORT, () => {
 
 
 const { google } = require('googleapis');
-const keys = require('./etc/secrets/credentials.json'); // path to your downloaded file
+const keys = require('/etc/secrets/credentials.json'); // path to your downloaded file
 
 const auth = new google.auth.GoogleAuth({
   credentials: keys,
