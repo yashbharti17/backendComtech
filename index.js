@@ -97,7 +97,7 @@ app.listen(PORT, () => {
 
 
 const { google } = require('googleapis');
-const keys = require('./credentials.json'); // path to your downloaded file
+const keys = require('./etc/secrets/credentials.json'); // path to your downloaded file
 
 const auth = new google.auth.GoogleAuth({
   credentials: keys,
@@ -107,7 +107,7 @@ const auth = new google.auth.GoogleAuth({
 const sheets = google.sheets({ version: 'v4', auth });
 app.post('/api/upload-to-google', async (req, res) => {
   const spreadsheetId = '1BM7tWdvlXbzoq9TLtpfT456MxzneJetG2ds26D5q5LU';
-  const sheetName = 'sheet1';
+  const sheetName = 'Gocybersolution_Survey';
 
   try {
     // ✅ Flatten object: convert array values to comma-separated strings
